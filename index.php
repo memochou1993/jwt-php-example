@@ -1,5 +1,8 @@
 <?php
-require_once 'JWT.php';
+require_once 'vendor/autoload.php';
+
+use SimpleJWT\JWT;
+use SimpleJWT\JWTException;
 
 /**
  * JWT Example
@@ -25,10 +28,9 @@ $token = JWT::encode($payload, $secret);
 echo "JWT: " . $token . PHP_EOL;
 
 // Decode the JWT and verify the signature
-$decoded = JWT::decode($token, $secret);
-
-if ($decoded) {
+try {
+    $decoded = JWT::decode($token, '$secret');
     print_r($decoded);
-} else {
-    echo "Invalid token or signature.";
+} catch (JWTException $e) {
+    echo "Error: " . $e->getMessage();
 }

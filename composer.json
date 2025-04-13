@@ -1,0 +1,13 @@
+{
+    "name": "memochou1993/simple-jwt",
+    "description": "A simple JWT implementation.",
+    "type": "project",
+    "require": {
+        "php": ">=7.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "SimpleJWT\\": "SimpleJWT/"
+        }
+    }
+}

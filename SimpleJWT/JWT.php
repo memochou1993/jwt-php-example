@@ -1,7 +1,10 @@
 <?php
+namespace SimpleJWT;
+
 class JWT
 {
     private static $alg = 'HS256';
+
     private static $supported_algs = [
         'HS256' => 'sha256',
     ];
@@ -40,11 +43,14 @@ class JWT
         return "$headerEncoded.$payloadEncoded.$signatureEncoded";
     }
 
-    public static function decode(string $jwt, string $secret): ?array
+    /**
+     * @throws JWTException
+     */
+    public static function decode(string $jwt, string $secret): array
     {
         $parts = explode('.', $jwt);
         if (count($parts) !== 3) {
-            return null;
+            throw new JWTException('Invalid segment count.');
         }
 
         [$headerEncoded, $payloadEncoded, $signatureEncoded] = $parts;
@@ -53,8 +59,12 @@ class JWT
         $payload = json_decode(self::base64UrlDecode($payloadEncoded), true);
         $signature = self::base64UrlDecode($signatureEncoded);
 
-        if (!$header || !$payload || !isset($header['alg']) || !isset(self::$supported_algs[$header['alg']])) {
-            return null;
+        if (!$header || !$payload) {
+            throw new JWTException('Invalid header or payload encoding.');
+        }
+        
+        if (!isset($header['alg']) || !isset(self::$supported_algs[$header['alg']])) {
+            throw new JWTException('Unsupported algorithm.');
         }
 
         $expected_signature = hash_hmac(
@@ -66,7 +76,12 @@ class JWT
 
         // Use hash_equals to prevent timing attacks
         if (!hash_equals($expected_signature, $signature)) {
-            return null;
+            throw new JWTException('Invalid signature.');
+        }
+
+        // Verify the expiration time
+        if (isset($payload['exp']) && time() > $payload['exp']) {
+            throw new JWTException('Expired token.');
         }
 
         return $payload;
