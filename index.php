@@ -17,9 +17,10 @@ $ttl = 3600;
 
 // Set the payload data
 $payload = [
-    'user_id' => 123,
-    'role' => 'admin',
+    'sub' => 123,
     'exp' => time() + $ttl,
+    'iat' => time(),
+    'role' => 'admin',
 ];
 
 // Encode the payload into a JWT
@@ -29,7 +30,7 @@ echo "JWT: " . $token . PHP_EOL;
 
 // Decode the JWT and verify the signature
 try {
-    $decoded = JWT::decode($token, '$secret');
+    $decoded = JWT::decode($token, $secret);
     print_r($decoded);
 } catch (JWTException $e) {
     echo "Error: " . $e->getMessage();
